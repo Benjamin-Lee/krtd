@@ -5,4 +5,5 @@
 __author__ = "Benjamin D. Lee"
 __email__ = 'benjamindlee@me.com'
 
-from __version__ import __version__
+from .__version__ import __version__
+from .krtd import krtd, codon_rtd

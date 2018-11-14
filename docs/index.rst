@@ -7,6 +7,7 @@ Welcome to krtd's documentation!
 
    installation
    usage
+   api
    contributing
 
 

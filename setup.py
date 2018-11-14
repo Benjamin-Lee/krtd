@@ -103,6 +103,7 @@ setup(
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
     install_requires=REQUIRED,
+    tests_require=["hypothesis", "pytest"],
     include_package_data=True,
     license='MIT',
     classifiers=[
