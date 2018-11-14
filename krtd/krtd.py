@@ -34,7 +34,7 @@ def krtd(seq, k, overlap=True, return_full_dict=False):
         raise ValueError("RTD for sequences with degenerates is undefined.")
 
     return_times = defaultdict(lambda: dict(mean=0, std=0))
-    seq = np.fromiter((str(k_mer) for k_mer in seq.iter_kmers(k=k, overlap=overlap)), f'<U{k}')
+    seq = np.fromiter((str(k_mer) for k_mer in seq.iter_kmers(k=k, overlap=overlap)), '<U' + str(k))
     uniques = np.unique(seq)
     for k_mer in uniques:
         x = np.argwhere(seq == k_mer).flatten()
