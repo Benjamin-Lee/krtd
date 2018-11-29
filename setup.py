@@ -11,11 +11,6 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-version = {}
-with open("krtd/__version__.py") as fp:
-    exec(fp.read(), version)
-
-
 # Package meta-data.
 NAME = 'krtd'
 DESCRIPTION = "krtd"
@@ -23,7 +18,6 @@ URL = 'https://github.com/Benjamin-Lee/krtd'
 EMAIL = 'benjamindlee@me.com'
 AUTHOR = "Benjamin D. Lee"
 REQUIRES_PYTHON = '>=3.5.0'
-VERSION = version["__version__"]
 
 # What packages are required for this module to be executed?
 with open("requirements.txt", "r") as f:
@@ -44,12 +38,8 @@ with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
-if not VERSION:
-    with open(os.path.join(here, NAME, '__version__.py')) as f:
-        exec(f.read(), about)
-else:
-    about['__version__'] = VERSION
-
+with open(os.path.join(here, NAME, '__version__.py')) as f:
+    exec(f.read(), about)
 
 class UploadCommand(Command):
     """Support setup.py upload."""
