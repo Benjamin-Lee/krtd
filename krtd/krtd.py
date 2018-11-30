@@ -113,7 +113,6 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
             revcomp = str(DNA(k_mer).reverse_complement())
 
             if revcomp in result:
-                print(f"Revcomp {k_mer} seen!")
                 continue
 
             k_mer_indices = np.argwhere(seq == k_mer).flatten()
