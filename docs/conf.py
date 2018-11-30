@@ -46,7 +46,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
     'sphinxcontrib.programoutput',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.doctest'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -171,6 +172,8 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None, "http://scikit-bio.org/docs/latest/": None}
+intersphinx_mapping = {'https://docs.python.org/': None,
+                       "http://scikit-bio.org/docs/latest/": None,
+                       'http://docs.scipy.org/doc/numpy/': None}
 autodoc_member_order = 'bysource'
 add_module_names = False
