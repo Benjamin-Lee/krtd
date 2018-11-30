@@ -1,55 +1,51 @@
+import numpy as np
 import pytest
-import krtd
-from skbio import Sequence
-from skbio import DNA
 from hypothesis import given
 import hypothesis.strategies as st
+from skbio import DNA, Sequence
+
+from krtd import krtd
 
 def test_1_mer_rtd_str_no_gap():
-    # the mean is 0 and the std is 0
-    x = krtd.krtd("AA", 1)
-    assert x["A"]["mean"] == 0
-    assert x["A"]["std"] == 0
+    x = krtd("AA", 1)
+    assert np.array_equal(x["A"], np.array([0]))
 
-    # by default, non represented k-mers are given values of zero
-    assert x["T"]["mean"] == 0
-    assert x["T"]["std"] == 0
-
-def test_1_mer_rtd_seq_no_gap():
-    # the mean is 0 and the std is 0
-    x = krtd.krtd(Sequence("AA"), 1)
-    assert x["A"]["mean"] == 0
-    assert x["A"]["std"] == 0
-
-    # by default, non represented k-mers are given values of zero
-    assert x["T"]["mean"] == 0
-    assert x["T"]["std"] == 0
-
+    # by default, non represented k-mers are empty arrays
+    assert "T" not in x
+    assert "G" not in x
+    assert "C" not in x
 def test_1_mer_rtd_str_with_gap():
-    x = krtd.krtd("ATTATA", 1)
-    assert x["A"]["mean"] == 1.5 == (2 + 1) / 2
-    assert x["A"]["std"] == (((2 - 1.5)**2 + (1 - 1.5)**2) / 2)**0.5 == 0.5
+    x = krtd("AATTA", 1)
+    assert np.array_equal(x["A"], np.array([0, 2]))
+    assert np.array_equal(x["T"], np.array([0]))
 
-    assert x["T"]["mean"] == 0.5
-    assert x["T"]["std"] == 0.5
+    assert "G" not in x
+    assert "C" not in x
 
-    assert x["G"]["mean"] == 0
-    assert x["G"]["std"] == 0
+def test_2_mer_rtd_str_with_gap():
+    x = krtd("AATTAAT", 2)
+    assert np.array_equal(x["AA"], np.array([3]))
+    assert np.array_equal(x["AT"], np.array([3]))
 
-    assert x["C"]["mean"] == 0
-    assert x["C"]["std"] == 0
+@given(st.text(alphabet=["A", "T", "G", "C"]))
+def test_verify_length(seq):
+    for letter in ["A", "T", "G", "C"]:
+        if letter in seq:
+            assert len(krtd(seq, 1)[letter]) == seq.count(letter) - 1 # there are count - 1 k-mer distances
 
-def test_2_mer_rtd_str_no_gap():
-    x = krtd.krtd("AAATGCAA", 2)
-    assert x["AA"]["mean"] == x["AA"]["std"] == 2
-    assert x["AT"]["mean"] == x["AT"]["std"] == 0
 
 @given(st.text(alphabet=["A", "T", "G", "C"], min_size=3), st.integers(min_value=1, max_value=3))
 def test_Sequence_DNA_and_str_equality(seq, k):
-    assert krtd.krtd(seq, k) == krtd.krtd(Sequence(seq), k) == krtd.krtd(DNA(seq), k)
+    _str = krtd(seq, k)
+    _Sequence = krtd(Sequence(seq), k)
+    _DNA = krtd(DNA(seq), k)
+
+    for k_mer in _str.keys():
+        assert np.array_equal(_str[k_mer], _Sequence[k_mer])
+        assert np.array_equal(_str[k_mer], _DNA[k_mer])
 
 @given(st.text(alphabet=["R", "Y", "S", "W", "K", "M", "B", "D", "H", "V"], min_size=3),
        st.integers(min_value=1, max_value=3))
 def test_degenerate(seq, k):
     with pytest.raises(ValueError):
-        krtd.krtd(seq, k)
+        krtd(seq, k)
