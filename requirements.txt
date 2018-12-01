@@ -1,4 +1,4 @@
 click
 numpy>=1.15.4
-scikit-bio
+scikit-bio @ https://github.com/biocore/scikit-bio.git
 scipy
