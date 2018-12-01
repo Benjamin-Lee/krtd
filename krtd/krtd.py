@@ -70,11 +70,14 @@ def seq_to_array(seq, k=1, overlap=True):
 
     Examples:
         >>> seq_to_array("ATGC")
-        array(['A', 'T', 'G', 'C'], dtype='<U1')
+        array(['A', 'T', 'G', 'C'],
+              dtype='<U1')
         >>> seq_to_array("ATGC", k=2)
-        array(['AT', 'TG', 'GC'], dtype='<U2')
+        array(['AT', 'TG', 'GC'],
+              dtype='<U2')
         >>> seq_to_array("ATGC", k=2, overlap=False)
-        array(['AT', 'GC'], dtype='<U2')
+        array(['AT', 'GC'],
+              dtype='<U2')
 
     """
     return np.fromiter((str(k_mer) for k_mer in DNA(seq).iter_kmers(k=k, overlap=overlap)), '<U' + str(k))
