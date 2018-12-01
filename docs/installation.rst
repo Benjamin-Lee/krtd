@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/Benjamin-Lee/krtd
+    $ git clone git://github.com/Lab41/krtd
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/Benjamin-Lee/krtd/tarball/master
+    $ curl  -OL https://github.com/Lab41/krtd/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/Benjamin-Lee/krtd
-.. _tarball: https://github.com/Benjamin-Lee/krtd/tarball/master
+.. _Github repo: https://github.com/Lab41/krtd
+.. _tarball: https://github.com/Lab41/krtd/tarball/master

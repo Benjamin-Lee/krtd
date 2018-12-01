@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'krtd'
 DESCRIPTION = "krtd"
-URL = 'https://github.com/Benjamin-Lee/krtd'
+URL = 'https://github.com/Lab41/krtd'
 EMAIL = 'benjamindlee@me.com'
 AUTHOR = "Benjamin D. Lee"
 REQUIRES_PYTHON = '>=3.5.0'
