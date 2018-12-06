@@ -58,7 +58,7 @@ def distance_between_occurences(seq, k_mer, overlap=True):
     return x
 
 def seq_to_array(seq, k=1, overlap=True):
-    """Converts a DNA sequence into a Numpy vector.
+    """Converts a DNA sequence into a Numpy vector. If :math:`k>1`, then it creates a vector of the :math:`k`-mers.
 
     Args:
         seq (~skbio.sequence.DNA or str): The sequence to convert.
@@ -115,22 +115,20 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
         if reverse_complement:
             revcomp = str(DNA(k_mer).reverse_complement())
 
-            if revcomp in result:
-                continue
+            if revcomp not in result:
+                k_mer_indices = np.argwhere(seq == k_mer).flatten()
+                revcomp_indices = np.argwhere(seq == revcomp).flatten()
 
-            k_mer_indices = np.argwhere(seq == k_mer).flatten()
-            revcomp_indices = np.argwhere(seq == revcomp).flatten()
-
-            dists = cdist(k_mer_indices.reshape(-1, 1), revcomp_indices.reshape(-1, 1)).flatten() - 1
-            result[k_mer] = result[revcomp] = np.where(dists != -1)[0]
+                dists = cdist(k_mer_indices.reshape(-1, 1), revcomp_indices.reshape(-1, 1)).flatten() - 1
+                result[k_mer] = result[revcomp] = dists[np.where(dists != -1)[0]]
 
         else:
             result[k_mer] = distance_between_occurences(seq, k_mer)
 
-    if return_full_dict:
-        for k_mer in itertools.product("ATGC", repeat=k):
-            result["".join(k_mer)]
-        result = dict(result)
+    # if return_full_dict:
+    #     for k_mer in itertools.product("ATGC", repeat=k):
+    #         result["".join(k_mer)]
+    #     result = dict(result)
 
     return result
 

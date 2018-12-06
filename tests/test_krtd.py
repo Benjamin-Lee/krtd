@@ -14,6 +14,7 @@ def test_1_mer_rtd_str_no_gap():
     assert "T" not in x
     assert "G" not in x
     assert "C" not in x
+
 def test_1_mer_rtd_str_with_gap():
     x = krtd("AATTA", 1)
     assert np.array_equal(x["A"], np.array([0, 2]))
@@ -33,7 +34,6 @@ def test_verify_length(seq):
         if letter in seq:
             assert len(krtd(seq, 1)[letter]) == seq.count(letter) - 1 # there are count - 1 k-mer distances
 
-
 @given(st.text(alphabet=["A", "T", "G", "C"], min_size=3), st.integers(min_value=1, max_value=3))
 def test_Sequence_DNA_and_str_equality(seq, k):
     _str = krtd(seq, k)
@@ -49,3 +49,8 @@ def test_Sequence_DNA_and_str_equality(seq, k):
 def test_degenerate(seq, k):
     with pytest.raises(ValueError):
         krtd(seq, k)
+
+def test_3_mer_revcomp_rtd():
+    x = krtd("ATGCCATGCAT", 3, reverse_complement=True)
+    assert np.array_equal(x["ATG"], np.array([3, 7, 0, 2]))
+    assert np.array_equal(x["CAT"], np.array([3, 7, 0, 2]))
