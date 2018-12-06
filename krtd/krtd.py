@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-import warnings
-from collections import defaultdict
 
 import numpy as np
 from scipy.spatial.distance import cdist
 from skbio.sequence import DNA
-
-warnings.filterwarnings("ignore", "Mean of empty slice")
-warnings.filterwarnings("ignore", "Degrees of freedom")
 
 def distance_between_occurences(seq, k_mer, overlap=True):
     """Takes a DNA sequence and a :math:`k`-mer and calcules the return times for the :math:`k`-mer.
@@ -89,10 +84,14 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
         seq (~skbio.sequence.DNA or str): The sequence to analyze.
         k (int): The :math:`k` value to use.
         overlap (bool, optional): Whether the :math:`k`-mers should overlap. Defaults to True.
+        reverse_complement (bool, optional): Whether to calculate distances between a :math:`k`-mer and its next occurence or the distances between :math:`k`-mers and their reverse complements.
         return_full_dict (bool, optional): Whether to return a full dictionary containing every :math:`k`-mer and its RTD. For large values of :math:`k`, as the sparsity of the space in creased, returning a full dictionary may be very slow. If False, returns a :obj:`~collections.defaultdict`. Functionally, this should be identical to a full dictionary if accessing dictionary elements. Defaults to False.
 
+    Warning:
+        Setting ``return_full_dict=True`` will take exponentially more time and as ``k`` increases.
+
     Returns:
-        dict:
+        dict: A dictionary of the shape ``{k_mer: distances}`` in which ``k_mer`` is a str and distances is a :obj:`~numpy.ndarray`.
 
     Raises:
         ValueError: When the sequence is degenerate.
@@ -131,10 +130,11 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
         else:
             result[k_mer] = distance_between_occurences(seq, k_mer)
 
-    # if return_full_dict:
-    #     for k_mer in itertools.product("ATGC", repeat=k):
-    #         result["".join(k_mer)]
-    #     result = dict(result)
+    # fill in the result dictionary (expensive!)
+    if return_full_dict:
+        for k_mer in ("".join(_k_mer) for _k_mer in itertools.product("ATGC", repeat=k)):
+            if k_mer not in result:
+                result[k_mer] = np.empty(0)
 
     return result
 
@@ -146,7 +146,7 @@ def codon_rtd(seq):
         seq (~skbio.sequence.DNA or str): The sequence to analyze.
 
     Returns:
-        dict: A dict whose keys are codons and whose values are dicts of the form ``{mean: 0, std: 0}``.
+        dict: See :func:`krtd`.
 
     Raises:
         ValueError: When the sequence is not able to be divided into codons.
