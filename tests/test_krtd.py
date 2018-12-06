@@ -54,3 +54,8 @@ def test_3_mer_revcomp_rtd():
     x = krtd("ATGCCATGCAT", 3, reverse_complement=True)
     assert np.array_equal(x["ATG"], np.array([3, 7, 0, 2]))
     assert np.array_equal(x["CAT"], np.array([3, 7, 0, 2]))
+
+def test_3_mer_revcomp_rtd_no_overlap():
+    x = krtd("ATGCCATGCCATATGCATTAG", 3, reverse_complement=True, overlap=False)
+    assert np.array_equal(x["ATG"], np.array([8, 14, 2, 2]))
+    assert np.array_equal(x["CAT"], np.array([8, 14, 2, 2]))

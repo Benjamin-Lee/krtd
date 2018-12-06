@@ -120,7 +120,13 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
                 revcomp_indices = np.argwhere(seq == revcomp).flatten()
 
                 dists = cdist(k_mer_indices.reshape(-1, 1), revcomp_indices.reshape(-1, 1)).flatten() - 1
-                result[k_mer] = result[revcomp] = dists[np.where(dists != -1)[0]]
+                dists = dists[np.where(dists != -1)[0]]
+
+                if not overlap:
+                    dists *= len(k_mer)
+                    dists += len(k_mer) - 1
+
+            result[k_mer] = result[revcomp] = dists
 
         else:
             result[k_mer] = distance_between_occurences(seq, k_mer)
