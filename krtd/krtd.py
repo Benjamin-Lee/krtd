@@ -128,7 +128,7 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
                 result[k_mer] = result[revcomp] = dists
 
         else:
-            result[k_mer] = distance_between_occurences(seq, k_mer)
+            result[k_mer] = distance_between_occurences(seq, k_mer, overlap=overlap)
 
     # fill in the result dictionary (expensive!)
     if return_full_dict:

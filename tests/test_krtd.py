@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from hypothesis import given
-import hypothesis.strategies as st
+from hypothesis import given, strategies as st
 from skbio import DNA, Sequence
 
 from krtd import krtd
@@ -59,3 +58,11 @@ def test_3_mer_revcomp_rtd_no_overlap():
     x = krtd("ATGCCATGCCATATGCATTAG", 3, reverse_complement=True, overlap=False)
     assert np.array_equal(x["ATG"], np.array([8, 14, 2, 2]))
     assert np.array_equal(x["CAT"], np.array([8, 14, 2, 2]))
+
+def test_3_mer_rtd_no_overlap():
+    x = krtd("ATGCCATGCCATATGCATTAG", 3, overlap=False)
+    assert np.array_equal(x["ATG"], np.array([11]))
+    assert np.array_equal(x["CAT"], np.array([5]))
+
+def test_full_dict_1_mer():
+    assert len(krtd("AT", 1, return_full_dict=True)) == 4
