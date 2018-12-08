@@ -65,4 +65,6 @@ def test_3_mer_rtd_no_overlap():
     assert np.array_equal(x["CAT"], np.array([5]))
 
 def test_full_dict_1_mer():
-    assert len(krtd("AT", 1, return_full_dict=True)) == 4
+    x = krtd("AT", 1, return_full_dict=True)
+    assert len(x) == 4
+    assert np.array_equal(x["G"], np.array([]))
