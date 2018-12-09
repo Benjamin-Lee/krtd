@@ -22,7 +22,7 @@ import krtd
 # -- Project information -----------------------------------------------------
 
 project = 'krtd'
-copyright = "2018, In-Q-Tel, Inc"
+copyright = "2018, IQT Labs LLC"
 author = "Benjamin D. Lee"
 
 # The short X.Y version
