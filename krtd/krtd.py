@@ -77,7 +77,7 @@ def seq_to_array(seq, k=1, overlap=True):
     """
     return np.fromiter((str(k_mer) for k_mer in DNA(seq).iter_kmers(k=k, overlap=overlap)), '<U' + str(k))
 
-def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False):
+def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False, metrics=None):
     """Calculates the :math:`k`-mer return time distribution for a sequence.
 
     Args:
@@ -86,16 +86,51 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
         overlap (bool, optional): Whether the :math:`k`-mers should overlap. Defaults to True.
         reverse_complement (bool, optional): Whether to calculate distances between a :math:`k`-mer and its next occurence or the distances between :math:`k`-mers and their reverse complements.
         return_full_dict (bool, optional): Whether to return a full dictionary containing every :math:`k`-mer and its RTD. For large values of :math:`k`, as the sparsity of the space in creased, returning a full dictionary may be very slow. If False, returns a :obj:`~collections.defaultdict`. Functionally, this should be identical to a full dictionary if accessing dictionary elements. Defaults to False.
+        metrics (list): A list of functions which, if passed, will be applied to each RTD array.
 
     Warning:
         Setting ``return_full_dict=True`` will take exponentially more time and as ``k`` increases.
 
     Returns:
-        dict: A dictionary of the shape ``{k_mer: distances}`` in which ``k_mer`` is a str and distances is a :obj:`~numpy.ndarray`.
+        dict: A dictionary of the shape ``{k_mer: distances}`` in which ``k_mer`` is a str and distances is a :obj:`~numpy.ndarray`. If ``metrics`` is passed, the values of the dictionary will be dictionaries mapping each function to its value (see examples below).
 
     Raises:
         ValueError: When the sequence is degenerate.
 
+    Examples:
+        >>> from pprint import pprint # for prettier printing
+        >>> pprint(krtd("ATGCACAGTTCAGA", 1))
+        {'A': array([3, 1, 4, 1]),
+         'C': array([1, 4]),
+         'G': array([4, 4]),
+         'T': array([6, 0])}
+        >>> pprint(krtd("ATGCACAGTTCAGA", 1, metrics=[np.mean, np.std]))
+        {'A': {'mean': 2.25, 'std': 1.299038105676658},
+         'C': {'mean': 2.5, 'std': 1.5},
+         'G': {'mean': 4.0, 'std': 0.0},
+         'T': {'mean': 3.0, 'std': 3.0}}
+        >>> pprint(krtd("ATGCACAGTTCAGA", 2, reverse_complement=True))
+        {'AA': array([], dtype=int64),
+         'AC': array([2]),
+         'AG': array([], dtype=int64),
+         'AT': array([], dtype=int64),
+         'CA': array([1, 3, 8]),
+         'CT': array([], dtype=int64),
+         'GA': array([2]),
+         'GC': array([], dtype=int64),
+         'GT': array([2]),
+         'TC': array([2]),
+         'TG': array([1, 3, 8]),
+         'TT': array([], dtype=int64)}
+        >>> pprint(krtd("ATGATTGGATATTATGAGGA", 1)) # no value for "C" is printed since it's not in the original sequence
+        {'A': array([2, 4, 1, 2, 2, 2]),
+         'G': array([3, 0, 7, 1, 0]),
+         'T': array([2, 0, 3, 1, 0, 1])}
+        >>> pprint(krtd("ATGATTGGATATTATGAGGA", 1, return_full_dict=True)) # now it is
+        {'A': array([2, 4, 1, 2, 2, 2]),
+         'C': array([], dtype=int64),
+         'G': array([3, 0, 7, 1, 0]),
+         'T': array([2, 0, 3, 1, 0, 1])}
     """
 
     # convert to DNA object
@@ -125,25 +160,34 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False)
                     dists *= len(k_mer)
                     dists += len(k_mer) - 1
 
+                dists = dists.astype("int64")
+
+                if metrics:
+                    dists = analyze_rtd(dists, metrics)
+
                 result[k_mer] = result[revcomp] = dists
 
         else:
-            result[k_mer] = distance_between_occurences(seq, k_mer, overlap=overlap)
+            dists = distance_between_occurences(seq, k_mer, overlap=overlap)
+            if metrics:
+                dists = analyze_rtd(dists, metrics)
+            result[k_mer] = dists
 
     # fill in the result dictionary (expensive!)
     if return_full_dict:
         for k_mer in ("".join(_k_mer) for _k_mer in itertools.product("ATGC", repeat=k)):
             if k_mer not in result:
-                result[k_mer] = np.empty(0)
+                result[k_mer] = np.empty(0, dtype="int64")
 
     return result
 
 
-def codon_rtd(seq):
+def codon_rtd(seq, metrics=None):
     """An alias for ``krtd(seq, 3, overlap=False, return_full_dict=True)`` which calculates the return time distribution for codons.
 
     Args:
         seq (~skbio.sequence.DNA or str): The sequence to analyze.
+        metrics (list): See :func:`krtd`.
 
     Returns:
         dict: See :func:`krtd`.
@@ -153,4 +197,10 @@ def codon_rtd(seq):
     """
     if len(seq) % 3 != 0:
         raise ValueError("Sequence is not able to be divided into codons.")
-    return krtd(seq, 3, overlap=False, return_full_dict=True)
+    return krtd(seq, 3, overlap=False, return_full_dict=True, metrics=metrics)
+
+def analyze_rtd(rtd, metrics):
+    result = {}
+    for metric in metrics:
+        result[metric.__name__] = metric(rtd)
+    return result
