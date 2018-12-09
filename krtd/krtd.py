@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import warnings
 
 import numpy as np
 from scipy.spatial.distance import cdist
 from skbio.sequence import DNA
+
+# ignore some common warnings resulting from calculating metrics
+warnings.filterwarnings("ignore", "Mean of empty slice")
+warnings.filterwarnings("ignore", "Degrees of freedom")
+warnings.filterwarnings("ignore", "invalid value encountered in double_scalars")
 
 def distance_between_occurences(seq, k_mer, overlap=True):
     """Takes a DNA sequence and a :math:`k`-mer and calcules the return times for the :math:`k`-mer.
@@ -177,7 +183,10 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
     if return_full_dict:
         for k_mer in ("".join(_k_mer) for _k_mer in itertools.product("ATGC", repeat=k)):
             if k_mer not in result:
-                result[k_mer] = np.empty(0, dtype="int64")
+                dists = np.empty(0, dtype="int64")
+                if metrics:
+                    dists = analyze_rtd(dists, metrics)
+                result[k_mer] = dists
 
     return result
 
