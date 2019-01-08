@@ -169,14 +169,14 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
                 dists = dists.astype("int64")
 
                 if metrics:
-                    dists = analyze_rtd(dists, metrics)
+                    dists = _analyze_rtd(dists, metrics)
 
                 result[k_mer] = result[revcomp] = dists
 
         else:
             dists = distance_between_occurences(seq, k_mer, overlap=overlap)
             if metrics:
-                dists = analyze_rtd(dists, metrics)
+                dists = _analyze_rtd(dists, metrics)
             result[k_mer] = dists
 
     # fill in the result dictionary (expensive!)
@@ -185,7 +185,7 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
             if k_mer not in result:
                 dists = np.empty(0, dtype="int64")
                 if metrics:
-                    dists = analyze_rtd(dists, metrics)
+                    dists = _analyze_rtd(dists, metrics)
                 result[k_mer] = dists
 
     return result
@@ -208,7 +208,16 @@ def codon_rtd(seq, metrics=None):
         raise ValueError("Sequence is not able to be divided into codons.")
     return krtd(seq, 3, overlap=False, return_full_dict=True, metrics=metrics)
 
-def analyze_rtd(rtd, metrics):
+def _analyze_rtd(rtd, metrics):
+    """A convenience function for building a dict of metrics and their values for an RTD array.
+
+    Args:
+        rtd (~numpy.ndarray): The RTD array to analyze.
+        metrics (list): A list of functions to call on the RTD array.
+
+    Returns:
+        dict: The string name of each metric and its value.
+    """
     result = {}
     for metric in metrics:
         result[metric.__name__] = metric(rtd)
