@@ -13,7 +13,8 @@ warnings.filterwarnings("ignore", "Degrees of freedom")
 warnings.filterwarnings("ignore", "invalid value encountered in double_scalars")
 
 def distance_between_occurences(seq, k_mer, overlap=True):
-    """Takes a DNA sequence and a :math:`k`-mer and calcules the return times for the :math:`k`-mer.
+    """Takes a DNA sequence and a :math:`k`-mer and calcules the return times
+    for the :math:`k`-mer.
 
     Args:
         seq (~numpy.ndarray, str, or ~skbio.sequence.DNA): The DNA sequence to analyze.
@@ -24,7 +25,9 @@ def distance_between_occurences(seq, k_mer, overlap=True):
         ~numpy.ndarray: The return times.
 
     Note:
-        The distance between occurences is defined as the number of nucleotides between the first base of the :math:`k`-mer and first base of its next occurence.
+        The distance between occurences is defined as the number of nucleotides
+        between the first base of the :math:`k`-mer and first base of its next
+        occurence.
 
     Examples:
         >>> distance_between_occurences("ATGATA", "A")
@@ -59,12 +62,14 @@ def distance_between_occurences(seq, k_mer, overlap=True):
     return x
 
 def seq_to_array(seq, k=1, overlap=True):
-    """Converts a DNA sequence into a Numpy vector. If :math:`k>1`, then it creates a vector of the :math:`k`-mers.
+    """Converts a DNA sequence into a Numpy vector. If :math:`k>1`, then it
+    creates a vector of the :math:`k`-mers.
 
     Args:
         seq (~skbio.sequence.DNA or str): The sequence to convert.
         k (int, optional): The :math:`k` value to use. Defaults to 1.
-        overlap (bool, optional): Whether the :math:`k`-mers should overlap. Defaults to True.
+        overlap (bool, optional): Whether the :math:`k`-mers should overlap.
+            Defaults to True.
 
     Returns:
         ~numpy.ndarray: An array representing the sequence.
@@ -89,10 +94,20 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
     Args:
         seq (~skbio.sequence.DNA or str): The sequence to analyze.
         k (int): The :math:`k` value to use.
-        overlap (bool, optional): Whether the :math:`k`-mers should overlap. Defaults to True.
-        reverse_complement (bool, optional): Whether to calculate distances between a :math:`k`-mer and its next occurence or the distances between :math:`k`-mers and their reverse complements.
-        return_full_dict (bool, optional): Whether to return a full dictionary containing every :math:`k`-mer and its RTD. For large values of :math:`k`, as the sparsity of the space in creased, returning a full dictionary may be very slow. If False, returns a :obj:`~collections.defaultdict`. Functionally, this should be identical to a full dictionary if accessing dictionary elements. Defaults to False.
-        metrics (list): A list of functions which, if passed, will be applied to each RTD array.
+        overlap (bool, optional): Whether the :math:`k`-mers should overlap.
+            Defaults to True.
+        reverse_complement (bool, optional): Whether to calculate distances
+            between a :math:`k`-mer and its next occurence or the distances between
+            :math:`k`-mers and their reverse complements.
+        return_full_dict (bool, optional): Whether to return a full dictionary
+            containing every :math:`k`-mer and its RTD. For large values of
+            :math:`k`, as the sparsity of the space in creased, returning a full
+            dictionary may be very slow. If False, returns a
+            :obj:`~collections.defaultdict`. Functionally, this should be identical
+            to a full dictionary if accessing dictionary elements. Defaults to
+            False.
+        metrics (list): A list of functions which, if passed, will be applied to
+            each RTD array.
 
     Warning:
         Setting ``return_full_dict=True`` will take exponentially more time and as ``k`` increases.
@@ -192,7 +207,8 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
 
 
 def codon_rtd(seq, metrics=None):
-    """An alias for ``krtd(seq, 3, overlap=False, return_full_dict=True)`` which calculates the return time distribution for codons.
+    """An alias for ``krtd(seq, 3, overlap=False, return_full_dict=True)`` which
+    calculates the return time distribution for codons.
 
     Args:
         seq (~skbio.sequence.DNA or str): The sequence to analyze.
@@ -209,7 +225,8 @@ def codon_rtd(seq, metrics=None):
     return krtd(seq, 3, overlap=False, return_full_dict=True, metrics=metrics)
 
 def _analyze_rtd(rtd, metrics):
-    """A convenience function for building a dict of metrics and their values for an RTD array.
+    """A convenience function for building a dict of metrics and their values
+    for an RTD array.
 
     Args:
         rtd (~numpy.ndarray): The RTD array to analyze.
@@ -222,3 +239,67 @@ def _analyze_rtd(rtd, metrics):
     for metric in metrics:
         result[metric.__name__] = metric(rtd)
     return result
+
+def _k_mer_to_index(k_mer):
+    """Converts a k-mer to its numerical index.
+
+    Args:
+        k_mer (str): The :math:`k`-mer to convert.
+
+    Returns:
+        int: The index of the :math:`k`-mer.
+
+    Examples:
+        >>> _k_mer_to_index("A")
+        0
+        >>> _k_mer_to_index("T")
+        3
+        >>> _k_mer_to_index("TT")
+        15
+        >>> _k_mer_to_index("TTT")
+        63
+
+    """
+    result = 0
+    for base in k_mer:
+        result = result * 4 + ["A", "C", "G", "T"].index(base)
+    return result
+
+def rtd_metric_dict_to_array(rtd_metric_dict):
+    """A convenience function for deterministically turning RTD metric dicts
+    (such as the output of :func:`krtd`) into arrays, which is useful for
+    computing distances, *etc.*
+
+    The output array is a vector with :math:`4^{k}n` elements where :math:`n` is
+    the number of metrics that were analyzed. To understand the order of the
+    array, first consider an RTD metric dictionary with only one metric. The
+    zero-based index would correspond directly to the alphabetical index of the
+    :math:`k`-mer. If :math:`k=1`, the metric for A would be in position 0, C in
+    1, G, in 2, T in 3. If there is more than one metric, the metrics' values
+    for the :math:`k`-mer are listed in alphabetical order before proceeding to
+    the next :math:`k`-mer. See the example for a clarification.
+
+    Args:
+        rtd_metric_dict (dict): A dictionary mapping :math:`k`-mers to
+            dictionaries of metrics and their float values.
+
+    Example:
+        >>> d = krtd("ATGCATGCCGTA", 1, metrics=[np.mean, np.std])
+        >>> from pprint import pprint # for prettier printing
+        >>> pprint(d)
+        {'A': {'mean': 4.5, 'std': 1.5},
+         'C': {'mean': 1.5, 'std': 1.5},
+         'G': {'mean': 2.5, 'std': 0.5},
+         'T': {'mean': 3.5, 'std': 0.5}}
+        >>> rtd_metric_dict_to_array(d)
+        array([ 4.5,  1.5,  1.5,  1.5,  2.5,  0.5,  3.5,  0.5])
+        >>> d = krtd("ATGCATGCCGTA", 5, metrics=[np.mean, np.std])
+        >>> rtd_metric_dict_to_array(d).shape # should be (4**5)*2 or 2048
+        (2048,)
+    """
+    metric_names = sorted(list(rtd_metric_dict.values())[0]) # stringify the metric names
+    space = np.zeros((4**len(list(rtd_metric_dict.keys())[0])) * len(metric_names)) # create an empty array to represent the rtd data for a seq
+    for item in rtd_metric_dict.items(): # the iteration order doesn't matter
+        for metric in metric_names:
+            space[_k_mer_to_index(item[0]) * len(metric_names) + metric_names.index(metric)] = item[1][metric]
+    return np.nan_to_num(space) # fill the nans with 0
