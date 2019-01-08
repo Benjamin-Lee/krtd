@@ -1,4 +1,4 @@
 click
-scikit-bio
-numpy<1.14.0,>=1.9.2
+scikit-bio>=0.5.5
+numpy
 scipy
