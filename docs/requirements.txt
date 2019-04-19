@@ -1,1 +1,2 @@
 sphinxcontrib-programoutput
+git+https://github.com/WhyNotHugo/sphinx-autorun

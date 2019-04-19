@@ -12,11 +12,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import krtd
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-
-import krtd
 
 
 # -- Project information -----------------------------------------------------
@@ -47,7 +46,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinxcontrib.programoutput',
     'sphinx.ext.autosectionlabel',
-    'sphinx.ext.doctest'
+    'sphinx.ext.doctest',
+    'sphinx_autorun'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

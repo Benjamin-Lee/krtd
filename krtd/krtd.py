@@ -30,16 +30,14 @@ def distance_between_occurences(seq, k_mer, overlap=True):
         occurence.
 
     Examples:
-        >>> distance_between_occurences("ATGATA", "A")
-        array([2, 1])
-        >>> distance_between_occurences("ATGATA", "AT")
-        array([2])
-        >>> distance_between_occurences("ATGAAATA", "AT")
-        array([4])
-        >>> distance_between_occurences("ATAAAATAAATA", "ATA")
-        array([4, 3])
-        >>> distance_between_occurences("ATAAAATAAATA", "ATA", overlap=False)
-        array([8])
+        .. runblock:: pycon
+
+            >>> from krtd import distance_between_occurences # ignore
+            >>> distance_between_occurences("ATGATA", "A")
+            >>> distance_between_occurences("ATGATA", "AT")
+            >>> distance_between_occurences("ATGAAATA", "AT")
+            >>> distance_between_occurences("ATAAAATAAATA", "ATA")
+            >>> distance_between_occurences("ATAAAATAAATA", "ATA", overlap=False)
 
     """
     if not isinstance(seq, np.ndarray):
@@ -75,15 +73,12 @@ def seq_to_array(seq, k=1, overlap=True):
         ~numpy.ndarray: An array representing the sequence.
 
     Examples:
-        >>> seq_to_array("ATGC")
-        array(['A', 'T', 'G', 'C'],
-              dtype='<U1')
-        >>> seq_to_array("ATGC", k=2)
-        array(['AT', 'TG', 'GC'],
-              dtype='<U2')
-        >>> seq_to_array("ATGC", k=2, overlap=False)
-        array(['AT', 'GC'],
-              dtype='<U2')
+        .. runblock:: pycon
+
+            >>> from krtd import seq_to_array # ignore
+            >>> seq_to_array("ATGC")
+            >>> seq_to_array("ATGC", k=2)
+            >>> seq_to_array("ATGC", k=2, overlap=False)
 
     """
     return np.fromiter((str(k_mer) for k_mer in DNA(seq).iter_kmers(k=k, overlap=overlap)), '<U' + str(k))
@@ -119,39 +114,16 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
         ValueError: When the sequence is degenerate.
 
     Examples:
-        >>> from pprint import pprint # for prettier printing
-        >>> pprint(krtd("ATGCACAGTTCAGA", 1))
-        {'A': array([3, 1, 4, 1]),
-         'C': array([1, 4]),
-         'G': array([4, 4]),
-         'T': array([6, 0])}
-        >>> pprint(krtd("ATGCACAGTTCAGA", 1, metrics=[np.mean, np.std]))
-        {'A': {'mean': 2.25, 'std': 1.299038105676658},
-         'C': {'mean': 2.5, 'std': 1.5},
-         'G': {'mean': 4.0, 'std': 0.0},
-         'T': {'mean': 3.0, 'std': 3.0}}
-        >>> pprint(krtd("ATGCACAGTTCAGA", 2, reverse_complement=True))
-        {'AA': array([], dtype=int64),
-         'AC': array([2]),
-         'AG': array([], dtype=int64),
-         'AT': array([], dtype=int64),
-         'CA': array([1, 3, 8]),
-         'CT': array([], dtype=int64),
-         'GA': array([2]),
-         'GC': array([], dtype=int64),
-         'GT': array([2]),
-         'TC': array([2]),
-         'TG': array([1, 3, 8]),
-         'TT': array([], dtype=int64)}
-        >>> pprint(krtd("ATGATTGGATATTATGAGGA", 1)) # no value for "C" is printed since it's not in the original sequence
-        {'A': array([2, 4, 1, 2, 2, 2]),
-         'G': array([3, 0, 7, 1, 0]),
-         'T': array([2, 0, 3, 1, 0, 1])}
-        >>> pprint(krtd("ATGATTGGATATTATGAGGA", 1, return_full_dict=True)) # now it is
-        {'A': array([2, 4, 1, 2, 2, 2]),
-         'C': array([], dtype=int64),
-         'G': array([3, 0, 7, 1, 0]),
-         'T': array([2, 0, 3, 1, 0, 1])}
+        .. runblock:: pycon
+
+            >>> from krtd import krtd # ignore
+            >>> from pprint import pprint as print # for prettier printing # ignore
+            >>> import numpy as np # ignore
+            >>> print(krtd("ATGCACAGTTCAGA", 1))
+            >>> print(krtd("ATGCACAGTTCAGA", 1, metrics=[np.mean, np.std]))
+            >>> print(krtd("ATGCACAGTTCAGA", 2, reverse_complement=True))
+            >>> print(krtd("ATGATTGGATATTATGAGGA", 1)) # no value for "C" is printed since it's not in the original sequence
+            >>> print(krtd("ATGATTGGATATTATGAGGA", 1, return_full_dict=True)) # now it is
     """
 
     # convert to DNA object
@@ -284,18 +256,18 @@ def rtd_metric_dict_to_array(rtd_metric_dict):
             dictionaries of metrics and their float values.
 
     Example:
-        >>> d = krtd("ATGCATGCCGTA", 1, metrics=[np.mean, np.std])
-        >>> from pprint import pprint # for prettier printing
-        >>> pprint(d)
-        {'A': {'mean': 4.5, 'std': 1.5},
-         'C': {'mean': 1.5, 'std': 1.5},
-         'G': {'mean': 2.5, 'std': 0.5},
-         'T': {'mean': 3.5, 'std': 0.5}}
-        >>> rtd_metric_dict_to_array(d)
-        array([ 4.5,  1.5,  1.5,  1.5,  2.5,  0.5,  3.5,  0.5])
-        >>> d = krtd("ATGCATGCCGTA", 5, metrics=[np.mean, np.std])
-        >>> rtd_metric_dict_to_array(d).shape # should be (4**5)*2 or 2048
-        (2048,)
+        .. runblock:: pycon
+
+            >>> from krtd import krtd, rtd_metric_dict_to_array # ignore
+            >>> from pprint import pprint as print # for prettier printing # ignore
+            >>> import numpy as np # ignore
+            >>> import warnings # ignores the warning caused by dividing by zero # ignore
+            >>> warnings.simplefilter("ignore") # ignore
+            >>> d = krtd("ATGCATGCCGTA", 1, metrics=[np.mean, np.std])
+            >>> print(d)
+            >>> rtd_metric_dict_to_array(d)
+            >>> d = krtd("ATGCATGCCGTA", 5, metrics=[np.mean, np.std])
+            >>> rtd_metric_dict_to_array(d).shape # should be (4**5)*2 or 2048
     """
     metric_names = sorted(list(rtd_metric_dict.values())[0]) # stringify the metric names
     space = np.zeros((4**len(list(rtd_metric_dict.keys())[0])) * len(metric_names)) # create an empty array to represent the rtd data for a seq
