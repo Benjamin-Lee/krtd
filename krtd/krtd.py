@@ -48,8 +48,7 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
 
     # convert to strings
     k_mer1, k_mer2 = str(k_mer1), str(k_mer2)
-    print(k_mer1, k_mer2)
-
+    
     # where the magic happens
     if k_mer1 == k_mer2:
         x = np.argwhere(seq == k_mer1).flatten()
