@@ -12,8 +12,8 @@ warnings.filterwarnings("ignore", "Degrees of freedom")
 warnings.filterwarnings("ignore", "invalid value encountered in double_scalars")
 
 
-def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
-    """Takes a DNA sequence and a :math:`k`-mer and calcules the return times
+def distance_between_occurrences(seq, k_mer1, k_mer2, overlap=True):
+    """Takes a DNA sequence and a :math:`k`-mer and calculates the return times
     for the :math:`k`-mer.
 
     Args:
@@ -26,18 +26,18 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
         ~numpy.ndarray: The return times.
 
     Note:
-        The distance between occurences is defined as the number of nucleotides
+        The distance between occurrences is defined as the number of nucleotides
         between the first base of the ``k_mer1`` and first base of ``k_mer2``.
 
     Examples:
         .. runblock:: pycon
 
-            >>> from krtd import distance_between_occurences # ignore
-            >>> distance_between_occurences("ATGATA", "A", "A")
-            >>> distance_between_occurences("ATGATA", "AT", "AT")
-            >>> distance_between_occurences("ATGAAATA", "AT", "AT")
-            >>> distance_between_occurences("ATAAAATAAATA", "ATA", "ATA")
-            >>> distance_between_occurences("ATAAAATAAATA", "ATA", "ATA", overlap=False)
+            >>> from krtd import distance_between_occurrences # ignore
+            >>> distance_between_occurrences("ATGATA", "A", "A")
+            # >>> distance_between_occurrences("ATGATA", "AT", "AT")
+            >>> distance_between_occurrences("ATGAAATA", "AT", "AT")
+            >>> distance_between_occurrences("ATAAAATAAATA", "ATA", "ATA")
+            >>> distance_between_occurrences("ATAAAATAAATA", "ATA", "ATA", overlap=False)
 
     """
     if len(k_mer1) != len(k_mer2):
@@ -65,8 +65,8 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
             x = np.array([])
 
     # not overlaping results in the distances being in the number of k-mers
-    # between occurences. For example,
-    # distance_between_occurences("ATAAAATAAATA", "ATA", "ATA", overlap=False) would
+    # between occurrences. For example,
+    # distance_between_occurrences("ATAAAATAAATA", "ATA", "ATA", overlap=False) would
     # result in array([2]) since there are two 3-mers between the ATAs if we
     # don't apply this correction
     if not overlap:
@@ -117,7 +117,7 @@ def krtd(
         overlap (bool, optional): Whether the :math:`k`-mers should overlap.
             Defaults to True.
         reverse_complement (bool, optional): Whether to calculate distances
-            between a :math:`k`-mer and its next occurence or the distances between
+            between a :math:`k`-mer and its next occurrence or the distances between
             :math:`k`-mers and their reverse complements.
         return_full_dict (bool, optional): Whether to return a full dictionary
             containing every :math:`k`-mer and its RTD. For large values of
@@ -163,7 +163,7 @@ def krtd(
     result = {}
     # only calculate RTDs of k-mers present in the seq, which is nice as sparsity increases
     for k_mer in np.unique(seq):
-        dists = distance_between_occurences(
+        dists = distance_between_occurrences(
             seq,
             k_mer,
             k_mer if not reverse_complement else DNA(k_mer).reverse_complement(),
