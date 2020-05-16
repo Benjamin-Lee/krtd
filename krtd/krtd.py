@@ -4,13 +4,13 @@ import itertools
 import warnings
 
 import numpy as np
-from scipy.spatial.distance import cdist
 from skbio.sequence import DNA
 
 # ignore some common warnings resulting from calculating metrics
 warnings.filterwarnings("ignore", "Mean of empty slice")
 warnings.filterwarnings("ignore", "Degrees of freedom")
 warnings.filterwarnings("ignore", "invalid value encountered in double_scalars")
+
 
 def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
     """Takes a DNA sequence and a :math:`k`-mer and calcules the return times
@@ -48,7 +48,7 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
 
     # convert to strings
     k_mer1, k_mer2 = str(k_mer1), str(k_mer2)
-    
+
     # where the magic happens
     if k_mer1 == k_mer2:
         x = np.argwhere(seq == k_mer1).flatten()
@@ -59,8 +59,8 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
         a = np.argwhere(seq == k_mer1).flatten()
         b = np.argwhere(seq == k_mer2).flatten()
         try:
-            c = a - b[np.argmax(a[:,None]<b,axis=1)]
-            x = c[c < 0]*-1 -1
+            c = a - b[np.argmax(a[:, None] < b, axis=1)]
+            x = c[c < 0] * -1 - 1
         except ValueError:
             x = np.array([])
 
@@ -74,6 +74,7 @@ def distance_between_occurences(seq, k_mer1, k_mer2, overlap=True):
         x += len(k_mer1) - 1
 
     return x
+
 
 def seq_to_array(seq, k=1, overlap=True):
     """Converts a DNA sequence into a Numpy vector. If :math:`k>1`, then it
@@ -100,9 +101,14 @@ def seq_to_array(seq, k=1, overlap=True):
     # convert to DNA object
     if not isinstance(seq, DNA):
         seq = DNA(seq)
-    return np.fromiter((str(k_mer) for k_mer in seq.iter_kmers(k=k, overlap=overlap)), '<U' + str(k))
+    return np.fromiter(
+        (str(k_mer) for k_mer in seq.iter_kmers(k=k, overlap=overlap)), "<U" + str(k)
+    )
 
-def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False, metrics=None):
+
+def krtd(
+    seq, k, overlap=True, reverse_complement=False, return_full_dict=False, metrics=None
+):
     """Calculates the :math:`k`-mer return time distribution for a sequence.
 
     Args:
@@ -157,14 +163,21 @@ def krtd(seq, k, overlap=True, reverse_complement=False, return_full_dict=False,
     result = {}
     # only calculate RTDs of k-mers present in the seq, which is nice as sparsity increases
     for k_mer in np.unique(seq):
-        dists = distance_between_occurences(seq, k_mer, k_mer if not reverse_complement else DNA(k_mer).reverse_complement(), overlap=overlap)
+        dists = distance_between_occurences(
+            seq,
+            k_mer,
+            k_mer if not reverse_complement else DNA(k_mer).reverse_complement(),
+            overlap=overlap,
+        )
         if metrics:
             dists = _analyze_rtd(dists, metrics)
         result[k_mer] = dists
 
     # fill in the result dictionary (expensive!)
     if return_full_dict:
-        for k_mer in ("".join(_k_mer) for _k_mer in itertools.product("ATGC", repeat=k)):
+        for k_mer in (
+            "".join(_k_mer) for _k_mer in itertools.product("ATGC", repeat=k)
+        ):
             if k_mer not in result:
                 dists = np.empty(0, dtype="int64")
                 if metrics:
@@ -192,6 +205,7 @@ def codon_rtd(seq, metrics=None):
         raise ValueError("Sequence is not able to be divided into codons.")
     return krtd(seq, 3, overlap=False, return_full_dict=True, metrics=metrics)
 
+
 def _analyze_rtd(rtd, metrics):
     """A convenience function for building a dict of metrics and their values
     for an RTD array.
@@ -207,6 +221,7 @@ def _analyze_rtd(rtd, metrics):
     for metric in metrics:
         result[metric.__name__] = metric(rtd)
     return result
+
 
 def _k_mer_to_index(k_mer):
     """Converts a k-mer to its numerical index.
@@ -232,6 +247,7 @@ def _k_mer_to_index(k_mer):
     for base in k_mer:
         result = result * 4 + ["A", "C", "G", "T"].index(base)
     return result
+
 
 def rtd_metric_dict_to_array(rtd_metric_dict):
     """A convenience function for deterministically turning RTD metric dicts
@@ -265,9 +281,16 @@ def rtd_metric_dict_to_array(rtd_metric_dict):
             >>> d = krtd("ATGCATGCCGTA", 5, metrics=[np.mean, np.std])
             >>> rtd_metric_dict_to_array(d).shape # should be (4**5)*2 or 2048
     """
-    metric_names = sorted(list(rtd_metric_dict.values())[0]) # stringify the metric names
-    space = np.zeros((4**len(list(rtd_metric_dict.keys())[0])) * len(metric_names)) # create an empty array to represent the rtd data for a seq
-    for item in rtd_metric_dict.items(): # the iteration order doesn't matter
+    metric_names = sorted(
+        list(rtd_metric_dict.values())[0]
+    )  # stringify the metric names
+    space = np.zeros(
+        (4 ** len(list(rtd_metric_dict.keys())[0])) * len(metric_names)
+    )  # create an empty array to represent the rtd data for a seq
+    for item in rtd_metric_dict.items():  # the iteration order doesn't matter
         for metric in metric_names:
-            space[_k_mer_to_index(item[0]) * len(metric_names) + metric_names.index(metric)] = item[1][metric]
-    return np.nan_to_num(space) # fill the nans with 0
+            space[
+                _k_mer_to_index(item[0]) * len(metric_names)
+                + metric_names.index(metric)
+            ] = item[1][metric]
+    return np.nan_to_num(space)  # fill the nans with 0
